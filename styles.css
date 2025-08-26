@@ -364,6 +364,162 @@ body {
      color: var(--white);
 }
 
+/* Silent Salah App Styles */
+.app-actions {
+     display: flex;
+     gap: 1rem;
+     margin: 2rem 0;
+     flex-wrap: wrap;
+     justify-content: center;
+}
+
+.btn-secondary {
+     background: transparent;
+     color: var(--accent);
+     border: 2px solid var(--accent);
+}
+
+.btn-secondary:hover {
+     background: var(--accent);
+     color: var(--primary-bg);
+}
+
+.back-link {
+     color: var(--gray);
+     text-decoration: none;
+     font-size: 0.9rem;
+     transition: color 0.2s;
+     margin-top: 1rem;
+     display: inline-block;
+}
+
+.back-link:hover {
+     color: var(--accent);
+}
+
+.features-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+     gap: 2rem;
+     margin-top: 2rem;
+}
+
+.feature-card {
+     background: var(--primary-bg);
+     border-radius: 18px;
+     padding: 2rem 1.5rem;
+     text-align: center;
+     box-shadow: 0 2px 12px rgba(34, 18, 58, 0.08);
+     transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+     transform: translateY(-6px) scale(1.03);
+     box-shadow: 0 6px 24px rgba(255, 166, 0, 0.12);
+}
+
+.feature-icon {
+     font-size: 2.5rem;
+     color: var(--accent);
+     margin-bottom: 1rem;
+}
+
+.benefits-content {
+     max-width: 800px;
+     margin: 0 auto;
+}
+
+.benefit-item {
+     background: var(--dark);
+     border-radius: 12px;
+     padding: 1.5rem;
+     margin-bottom: 1.5rem;
+     box-shadow: 0 2px 12px rgba(34, 18, 58, 0.08);
+}
+
+.benefit-item h3 {
+     color: var(--accent);
+     margin-bottom: 0.5rem;
+     font-size: 1.1rem;
+}
+
+.benefit-item p {
+     color: var(--gray);
+     margin: 0;
+     line-height: 1.6;
+}
+
+/* Privacy Policy Styles */
+.privacy-content {
+     max-width: 800px;
+     margin: 0 auto;
+}
+
+.privacy-section {
+     background: var(--primary-bg);
+     border-radius: 18px;
+     padding: 2rem;
+     margin-bottom: 2rem;
+     box-shadow: 0 2px 12px rgba(34, 18, 58, 0.08);
+}
+
+.privacy-section h2 {
+     color: var(--accent);
+     margin-bottom: 1rem;
+     font-size: 1.5rem;
+}
+
+.privacy-section p {
+     color: var(--gray);
+     line-height: 1.6;
+     margin-bottom: 1rem;
+}
+
+.info-item {
+     margin-bottom: 1.5rem;
+}
+
+.info-item h3 {
+     color: var(--white);
+     margin-bottom: 0.5rem;
+     font-size: 1.1rem;
+}
+
+.info-item p {
+     color: var(--gray);
+     margin: 0;
+}
+
+.privacy-list {
+     color: var(--gray);
+     line-height: 1.6;
+     padding-left: 1.5rem;
+}
+
+.privacy-list li {
+     margin-bottom: 0.5rem;
+}
+
+.privacy-section .contact-info {
+     text-align: left;
+     margin-top: 1rem;
+}
+
+.privacy-section .contact-info p {
+     margin: 0.3rem 0;
+}
+
+.privacy-section .contact-info a {
+     color: var(--accent);
+     text-decoration: none;
+     transition: color 0.2s;
+}
+
+.privacy-section .contact-info a:hover {
+     color: var(--white);
+     text-decoration: underline;
+}
+
 /* Responsive Styles */
 @media (max-width: 900px) {
      .nav-menu {
@@ -422,5 +578,23 @@ body {
      .hero-logo {
           width: 80px;
           height: 80px;
+     }
+
+     .app-actions {
+          flex-direction: column;
+          align-items: center;
+     }
+
+     .features-grid {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+     }
+
+     .privacy-section {
+          padding: 1.5rem;
+     }
+
+     .benefit-item {
+          padding: 1rem;
      }
 }
