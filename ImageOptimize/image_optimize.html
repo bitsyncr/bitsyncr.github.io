@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>JPEG Optimizer | BitSyncr</title>
+    <title>Image Optimize | BitSyncr</title>
     <link rel="icon" type="image/png" href="../assets/logo.png">
     <link rel="stylesheet" href="../styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,6 +80,20 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .card-description {
+            margin: 0.75rem 0 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            max-width: 720px;
+        }
+
+        .card-tagline {
+            margin: 0.5rem 0 0;
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
 
         .content {
@@ -269,13 +283,14 @@
 <main class="tool-main">
 <div class="card">
     <div class="card-header">
-        <h1>JPEG Tightener</h1>
+        <h1>Image Optimize</h1>
         <div class="badge-group">
             <span class="badge">📦 10 KB – 25 KB</span>
             <span class="badge">📐 ≥ 600x800 px</span>
             <span class="badge">⚡ JPG/JPEG output</span>
         </div>
-        <p style="margin: 0.5rem 0 0; font-size: 0.85rem;">Upload any image → automatic resize & compression → meets strict size + resolution</p>
+        <p class="card-description">Preparing a photo for school student registration? Upload any image and we automatically resize and compress it to meet common portal requirements — no manual editing needed.</p>
+        <p class="card-tagline">Perfect for student ID photos, admission forms, and online registration uploads that reject oversized or low-resolution files.</p>
     </div>
     <div class="content">
         <div class="upload-area" id="dropZone">
