@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>JPEG Optimizer | BitSyncr</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body.tool-page {
+            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f5 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tool-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .card {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(0px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .card-header {
+            background: #1e2a3e;
+            padding: 1.5rem 2rem;
+            color: white;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header h1:before {
+            content: "🖼️";
+            font-size: 1.8rem;
+        }
+
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .badge {
+            background: #2c3e4e;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #b9cedf;
+            border-radius: 1.5rem;
+            background: #fefefe;
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #fafdff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .card .btn {
+            background: #1e2a3e;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 0.6rem 1.5rem;
+            border-radius: 3rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .card .btn-primary {
+            background: #2563eb;
+        }
+
+        .card .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .card .btn-outline {
+            background: transparent;
+            border: 1px solid #b9cedf;
+            color: #1f3a4b;
+        }
+
+        .card .btn-outline:hover {
+            background: #eef3fc;
+        }
+
+        .preview-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .preview-card {
+            flex: 1;
+            min-width: 240px;
+            background: #ffffffcc;
+            backdrop-filter: blur(2px);
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2edf2;
+        }
+
+        .preview-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2edf2;
+            padding-bottom: 0.5rem;
+        }
+
+        .image-container {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            min-height: 220px;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+            background: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 0.8rem;
+        }
+
+        .status-msg {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            background: #fefce8;
+            border-left: 5px solid #eab308;
+        }
+
+        .success {
+            background: #e6f7ec;
+            border-left-color: #2e7d32;
+            color: #1e4620;
+        }
+
+        .error {
+            background: #ffe6e5;
+            border-left-color: #d32f2f;
+        }
+
+        .download-area {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border-color: #e2edf2;
+        }
+
+        @media (max-width: 680px) {
+            .content {
+                padding: 1.25rem;
+            }
+            .preview-grid {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="tool-page">
+
+<header class="header">
+    <div class="container nav-container">
+        <a href="../" class="logo-link">
+            <img src="../assets/logo.png" alt="BitSyncr Logo" class="logo-img">
+            <span class="logo-text">BitSyncr</span>
+        </a>
+        <nav class="nav">
+            <ul class="nav-menu">
+                <li><a href="../#about" class="nav-link">About</a></li>
+                <li><a href="../#services" class="nav-link">Services</a></li>
+                <li><a href="../#portfolio" class="nav-link">Portfolio</a></li>
+                <li><a href="../#team" class="nav-link">Team</a></li>
+                <li><a href="../#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="tool-main">
+<div class="card">
+    <div class="card-header">
+        <h1>JPEG Tightener</h1>
+        <div class="badge-group">
+            <span class="badge">📦 10 KB – 25 KB</span>
+            <span class="badge">📐 ≥ 600x800 px</span>
+            <span class="badge">⚡ JPG/JPEG output</span>
+        </div>
+        <p style="margin: 0.5rem 0 0; font-size: 0.85rem;">Upload any image → automatic resize & compression → meets strict size + resolution</p>
+    </div>
+    <div class="content">
+        <div class="upload-area" id="dropZone">
+            <div class="upload-icon">📸</div>
+            <p style="margin: 0 0 0.3rem; font-weight: 500;">Click or drag & drop an image</p>
+            <p style="font-size: 0.75rem; color: #4b6b7f;">JPG, PNG, WebP accepted (output JPEG)</p>
+            <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" class="file-input">
+        </div>
+
+        <div class="preview-grid" id="previewGrid" style="display: none;">
+            <!-- original preview card -->
+            <div class="preview-card">
+                <div class="preview-title">📂 Original</div>
+                <div class="image-container">
+                    <img id="originalImg" class="preview-img" alt="original preview">
+                </div>
+                <div class="info-row"><span>Dimensions:</span> <span id="origDims">—</span></div>
+                <div class="info-row"><span>File size:</span> <span id="origSize">—</span></div>
+            </div>
+            <!-- processed preview card -->
+            <div class="preview-card">
+                <div class="preview-title">✨ Optimized (JPEG)</div>
+                <div class="image-container">
+                    <img id="optimizedImg" class="preview-img" alt="optimized preview">
+                </div>
+                <div class="info-row"><span>Dimensions:</span> <span id="optDims">—</span></div>
+                <div class="info-row"><span>File size:</span> <span id="optSize">—</span></div>
+                <div class="info-row"><span>⚖️ Compliance:</span> <span id="complianceBadge">—</span></div>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="status-msg" style="display: none;"></div>
+
+        <div class="download-area" id="downloadSection" style="display: none;">
+            <button id="downloadBtn" class="btn btn-primary">💾 Download JPEG (optimized)</button>
+            <button id="resetBtn" class="btn btn-outline" style="margin-left: 12px;">⟳ New image</button>
+        </div>
+    </div>
+</div>
+</main>
+
+<script>
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+    document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    }));
+</script>
+<script>
+    // ----- CONSTRAINTS -----
+    const MIN_WIDTH = 600;
+    const MIN_HEIGHT = 800;
+    const MIN_SIZE_BYTES = 10240;   // 10 KB
+    const MAX_SIZE_BYTES = 25600;   // 25 KB
+    const MIN_QUALITY = 0.05;       // 5% quality floor
+    const MAX_QUALITY = 0.95;       // 95% quality ceiling
+    const MAX_ITER_DIM = 12;         // dimension adjustment safety
+    
+    // DOM elements
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const previewGrid = document.getElementById('previewGrid');
+    const originalImg = document.getElementById('originalImg');
+    const optimizedImg = document.getElementById('optimizedImg');
+    const origDimsSpan = document.getElementById('origDims');
+    const origSizeSpan = document.getElementById('origSize');
+    const optDimsSpan = document.getElementById('optDims');
+    const optSizeSpan = document.getElementById('optSize');
+    const complianceBadge = document.getElementById('complianceBadge');
+    const statusDiv = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    let currentProcessedBlob = null;      // final jpeg blob
+    let currentProcessedURL = null;
+    let originalFileObj = null;
+    let originalImageElement = null;
+    let isProcessing = false;
+    
+    // helper: format bytes
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // get blob from canvas with given quality (JPEG)
+    function getJPEGBlobFromCanvas(img, width, height, quality) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/jpeg', quality);
+        });
+    }
+    
+    // measure size for given dimensions & quality
+    async function measureBlobSize(img, width, height, quality) {
+        const blob = await getJPEGBlobFromCanvas(img, width, height, quality);
+        return { blob, size: blob.size };
+    }
+    
+    // binary search to find best quality that keeps size within [minBytes, maxBytes] for FIXED dimensions
+    // returns { success: bool, blob, size, quality } 
+    // if range is impossible (oversize/undersize) returns success=false + reason
+    async function findQualityForDimensions(img, width, height, minBytes, maxBytes) {
+        // first test extremes
+        const { size: sizeLow, blob: blobLow } = await measureBlobSize(img, width, height, MIN_QUALITY);
+        const { size: sizeHigh, blob: blobHigh } = await measureBlobSize(img, width, height, MAX_QUALITY);
+        
+        // edge cases: even max quality too small -> undersize
+        if (sizeHigh < minBytes) {
+            return { success: false, reason: 'undersize', sizeHigh, sizeLow, maxQualitySize: sizeHigh };
+        }
+        // even min quality too large -> oversize
+        if (sizeLow > maxBytes) {
+            return { success: false, reason: 'oversize', sizeLow, sizeHigh, minQualitySize: sizeLow };
+        }
+        
+        // if already within range at max quality, return max (best quality)
+        if (sizeHigh >= minBytes && sizeHigh <= maxBytes) {
+            return { success: true, blob: blobHigh, size: sizeHigh, quality: MAX_QUALITY };
+        }
+        // if within range at min quality, return min (but we prefer higher quality, so we'll search)
+        if (sizeLow >= minBytes && sizeLow <= maxBytes) {
+            // but maybe there is higher quality still inside? try binary search
+        }
+        
+        // binary search for quality yielding size in range
+        let lo = MIN_QUALITY, hi = MAX_QUALITY;
+        let bestBlob = blobLow;
+        let bestSize = sizeLow;
+        let bestQuality = MIN_QUALITY;
+        let foundValid = false;
+        
+        for (let iter = 0; iter < 18; iter++) {
+            const mid = (lo + hi) / 2;
+            const { blob, size } = await measureBlobSize(img, width, height, mid);
+            if (size >= minBytes && size <= maxBytes) {
+                // perfect within range
+                return { success: true, blob, size, quality: mid };
+            }
+            if (size < minBytes) {
+                lo = mid;   // increase quality to raise size
+                if (size > bestSize && size <= maxBytes) {
+                    bestBlob = blob; bestSize = size; bestQuality = mid;
+                    if (size >= minBytes) foundValid = true;
+                }
+            } else if (size > maxBytes) {
+                hi = mid;
+                if (size < bestSize && size >= minBytes) {
+                    bestBlob = blob; bestSize = size; bestQuality = mid;
+                    if (size <= maxBytes) foundValid = true;
+                }
+            }
+            // track best valid candidate
+            if (size >= minBytes && size <= maxBytes) foundValid = true;
+        }
+        
+        // final verification on best found candidate
+        if (foundValid && bestSize >= minBytes && bestSize <= maxBytes) {
+            return { success: true, blob: bestBlob, size: bestSize, quality: bestQuality };
+        }
+        
+        // fallback: if we have a size under max but maybe under min? we need to check if any quality yields >=min && <=max
+        // re-evaluate using final binary search best
+        for (let q = MIN_QUALITY; q <= MAX_QUALITY; q += 0.07) {
+            const { blob, size } = await measureBlobSize(img, width, height, q);
+            if (size >= minBytes && size <= maxBytes) {
+                return { success: true, blob, size, quality: q };
+            }
+        }
+        // If no exact interval, return the best that respects max (<=maxBytes) and has highest size near min
+        let bestRespectMax = { blob: blobLow, size: sizeLow, quality: MIN_QUALITY };
+        for (let q = MIN_QUALITY; q <= MAX_QUALITY; q += 0.05) {
+            const { blob, size } = await measureBlobSize(img, width, height, q);
+            if (size <= maxBytes && size > bestRespectMax.size) {
+                bestRespectMax = { blob, size, quality: q };
+            }
+        }
+        if (bestRespectMax.size >= minBytes) {
+            return { success: true, blob: bestRespectMax.blob, size: bestRespectMax.size, quality: bestRespectMax.quality };
+        }
+        // still can't hit lower bound, but we return best possible (under min but respects max) -> warning later
+        return { success: false, reason: 'undersize_final', blob: bestRespectMax.blob, size: bestRespectMax.size, quality: bestRespectMax.quality };
+    }
+    
+    // ensure min dimensions (preserve aspect ratio)
+    function enforceMinDimensions(imgWidth, imgHeight) {
+        let targetW = imgWidth;
+        let targetH = imgHeight;
+        if (imgWidth < MIN_WIDTH || imgHeight < MIN_HEIGHT) {
+            const scaleX = MIN_WIDTH / imgWidth;
+            const scaleY = MIN_HEIGHT / imgHeight;
+            const scale = Math.max(scaleX, scaleY);
+            targetW = Math.round(imgWidth * scale);
+            targetH = Math.round(imgHeight * scale);
+        }
+        return { width: Math.max(targetW, MIN_WIDTH), height: Math.max(targetH, MIN_HEIGHT) };
+    }
+    
+    // Main adaptive algorithm: meets 10-25KB & min resolution
+    async function optimizeToConstraints(originalImgElement, naturalWidth, naturalHeight) {
+        // Step 1: ensure we meet min resolution (upscale if needed) – initial dimensions candidate
+        let curDimensions = enforceMinDimensions(naturalWidth, naturalHeight);
+        let currentWidth = curDimensions.width;
+        let currentHeight = curDimensions.height;
+        
+        let bestResult = null;
+        let iteration = 0;
+        const maxAttempts = MAX_ITER_DIM;
+        
+        while (iteration < maxAttempts) {
+            // try quality search for current dimensions
+            const qualityResult = await findQualityForDimensions(originalImgElement, currentWidth, currentHeight, MIN_SIZE_BYTES, MAX_SIZE_BYTES);
+            
+            if (qualityResult.success && qualityResult.blob) {
+                // perfect match within range
+                return { blob: qualityResult.blob, size: qualityResult.size, width: currentWidth, height: currentHeight, quality: qualityResult.quality };
+            }
+            
+            // handle oversize / undersize by adjusting dimensions
+            const reason = qualityResult.reason;
+            if (reason === 'oversize') {
+                // current dimensions produce too large file even at min quality -> shrink dimensions (downscale)
+                let newWidth = Math.floor(currentWidth * 0.88);
+                let newHeight = Math.floor(currentHeight * 0.88);
+                // clamp to min constraints
+                const minRatio = Math.max(MIN_WIDTH / newWidth, MIN_HEIGHT / newHeight);
+                if (minRatio > 1) {
+                    newWidth = Math.max(MIN_WIDTH, Math.floor(newWidth * minRatio));
+                    newHeight = Math.max(MIN_HEIGHT, Math.floor(newHeight * minRatio));
+                } else {
+                    newWidth = Math.max(MIN_WIDTH, newWidth);
+                    newHeight = Math.max(MIN_HEIGHT, newHeight);
+                }
+                if (newWidth === currentWidth && newHeight === currentHeight) {
+                    // cannot shrink further without violating min resolution => impossible
+                    throw new Error("Cannot meet file size ≤25KB even at lowest quality and minimum dimensions (600x800). Image is too complex. Try a simpler image.");
+                }
+                currentWidth = newWidth;
+                currentHeight = newHeight;
+            } 
+            else if (reason === 'undersize' || reason === 'undersize_final') {
+                // size is below 10KB even at MAX quality -> upscale dimensions moderately (increase file size)
+                let newWidth = Math.floor(currentWidth * 1.12);
+                let newHeight = Math.floor(currentHeight * 1.12);
+                // upper limit: avoid absurd resolution (max 4000px width)
+                const MAX_UPSCALE_LIMIT = 3500;
+                if (newWidth > MAX_UPSCALE_LIMIT || newHeight > MAX_UPSCALE_LIMIT) {
+                    // we reached max upscale but still undersize -> return best we have (with warning)
+                    const fallbackBlob = qualityResult.blob ? qualityResult.blob : (await getJPEGBlobFromCanvas(originalImgElement, currentWidth, currentHeight, MAX_QUALITY));
+                    const fallbackSize = qualityResult.size || (await (await getJPEGBlobFromCanvas(originalImgElement, currentWidth, currentHeight, MAX_QUALITY)).size);
+                    return { blob: fallbackBlob, size: fallbackSize, width: currentWidth, height: currentHeight, warning: 'undersize_warning' };
+                }
+                currentWidth = newWidth;
+                currentHeight = newHeight;
+            }
+            else {
+                // unexpected, break
+                break;
+            }
+            iteration++;
+        }
+        
+        // final attempt: after loop, try one last time with best dimensions
+        const finalAttempt = await findQualityForDimensions(originalImgElement, currentWidth, currentHeight, MIN_SIZE_BYTES, MAX_SIZE_BYTES);
+        if (finalAttempt.blob) {
+            return { blob: finalAttempt.blob, size: finalAttempt.size, width: currentWidth, height: currentHeight, quality: finalAttempt.quality || 0.7 };
+        }
+        throw new Error("Unable to produce image that respects both constraints. Try a different image.");
+    }
+    
+    // main processing pipeline
+    async function processImage(file) {
+        if (!file) return;
+        if (isProcessing) {
+            showStatus("Processing already in progress...", false);
+            return;
+        }
+        isProcessing = true;
+        showStatus("⏳ Loading & optimizing image... hold on", false);
+        
+        try {
+            // read as dataURL and load image
+            const reader = new FileReader();
+            const fileData = await new Promise((resolve, reject) => {
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error("File read error"));
+                reader.readAsDataURL(file);
+            });
+            
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = () => reject(new Error("Invalid image format"));
+                img.src = fileData;
+            });
+            
+            originalImageElement = img;
+            const origWidth = img.naturalWidth;
+            const origHeight = img.naturalHeight;
+            const origSizeBytes = file.size;
+            
+            // show original info
+            originalImg.src = fileData;
+            origDimsSpan.innerText = `${origWidth} × ${origHeight}`;
+            origSizeSpan.innerText = formatBytes(origSizeBytes);
+            
+            // run optimizer
+            const optimized = await optimizeToConstraints(img, origWidth, origHeight);
+            
+            if (optimized.blob) {
+                const optURL = URL.createObjectURL(optimized.blob);
+                if (currentProcessedURL) URL.revokeObjectURL(currentProcessedURL);
+                currentProcessedURL = optURL;
+                currentProcessedBlob = optimized.blob;
+                optimizedImg.src = optURL;
+                optDimsSpan.innerText = `${optimized.width} × ${optimized.height}`;
+                const finalSizeBytes = optimized.size;
+                optSizeSpan.innerText = formatBytes(finalSizeBytes);
+                
+                // compliance verification
+                const dimsOk = (optimized.width >= MIN_WIDTH && optimized.height >= MIN_HEIGHT);
+                const sizeOk = (finalSizeBytes >= MIN_SIZE_BYTES && finalSizeBytes <= MAX_SIZE_BYTES);
+                let complianceText = "";
+                let complianceColor = "";
+                if (dimsOk && sizeOk) {
+                    complianceText = "✅ Fully compliant";
+                    complianceBadge.style.color = "#2e7d32";
+                } else if (dimsOk && finalSizeBytes < MIN_SIZE_BYTES) {
+                    complianceText = "⚠️ Size below 10KB (max quality reached)";
+                    complianceBadge.style.color = "#e68a2e";
+                } else if (dimsOk && finalSizeBytes > MAX_SIZE_BYTES) {
+                    complianceText = "⚠️ Slightly above 25KB (try simpler image)";
+                    complianceBadge.style.color = "#c62828";
+                } else {
+                    complianceText = "⚠️ Resolution constraint barely met, but within bounds";
+                    complianceBadge.style.color = "#f5a623";
+                }
+                if (dimsOk && sizeOk) complianceText = "✓ Meets 10KB–25KB & ≥600x800";
+                complianceBadge.innerText = complianceText;
+                
+                // Show download section and preview
+                previewGrid.style.display = "flex";
+                downloadSection.style.display = "block";
+                if (dimsOk && sizeOk) {
+                    showStatus("✅ Optimization successful! Image satisfies all constraints (10–25KB, 600x800+). Ready to download.", true);
+                } else if (finalSizeBytes < MIN_SIZE_BYTES) {
+                    showStatus(`⚠️ Final size ${formatBytes(finalSizeBytes)} is below 10KB. Upscaling limited. Still meets resolution.`, false);
+                } else if (finalSizeBytes > MAX_SIZE_BYTES) {
+                    showStatus(`⚠️ Final size ${formatBytes(finalSizeBytes)} slightly exceeds 25KB (max ${MAX_SIZE_BYTES/1024}KB). Try original with less texture/detail.`, false);
+                } else {
+                    showStatus("✔ Image processed but double-check resolution. Usually fine.", true);
+                }
+            } else {
+                throw new Error("Optimization failed to generate output");
+            }
+        } catch (err) {
+            console.error(err);
+            showStatus(`Error: ${err.message}`, false);
+            previewGrid.style.display = "none";
+            downloadSection.style.display = "none";
+        } finally {
+            isProcessing = false;
+        }
+    }
+    
+    function showStatus(msg, isSuccess) {
+        statusDiv.style.display = "block";
+        statusDiv.innerHTML = msg;
+        statusDiv.className = `status-msg ${isSuccess ? 'success' : ''}`;
+        if (!isSuccess && msg.includes("Error")) statusDiv.classList.add('error');
+        else if (!isSuccess && !msg.includes("Error")) statusDiv.classList.remove('error');
+        setTimeout(() => {
+            if (statusDiv.innerHTML === msg) {
+                // keep but could hide after but not necessary
+            }
+        }, 5000);
+    }
+    
+    function resetUI() {
+        if (currentProcessedURL) URL.revokeObjectURL(currentProcessedURL);
+        currentProcessedBlob = null;
+        currentProcessedURL = null;
+        previewGrid.style.display = "none";
+        downloadSection.style.display = "none";
+        statusDiv.style.display = "none";
+        fileInput.value = "";
+        originalImg.src = "";
+        optimizedImg.src = "";
+        originalFileObj = null;
+        originalImageElement = null;
+    }
+    
+    // download handler
+    downloadBtn.addEventListener('click', () => {
+        if (currentProcessedBlob) {
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(currentProcessedBlob);
+            link.href = url;
+            link.download = 'optimized_image.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showStatus("Download started!", true);
+        } else {
+            showStatus("No processed image available", false);
+        }
+    });
+    
+    resetBtn.addEventListener('click', () => {
+        resetUI();
+        fileInput.value = "";
+    });
+    
+    // trigger file picker
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#3b82f6';
+        dropZone.style.background = '#eef6ff';
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = '#b9cedf';
+        dropZone.style.background = '#fefefe';
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#b9cedf';
+        dropZone.style.background = '#fefefe';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            originalFileObj = file;
+            processImage(file);
+        } else {
+            showStatus("Please drop an image file (JPG, PNG, WebP)", false);
+        }
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            originalFileObj = e.target.files[0];
+            processImage(originalFileObj);
+        }
+    });
+</script>
+</body>
+</html>
