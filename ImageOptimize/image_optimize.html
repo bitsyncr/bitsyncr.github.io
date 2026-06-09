@@ -233,6 +233,80 @@
             border-color: #e2edf2;
         }
 
+        .settings-panel {
+            background: #f8fafc;
+            border: 1px solid #e2edf2;
+            border-radius: 1.2rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e2a3e;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .settings-field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #4b6b7f;
+            margin-bottom: 0.35rem;
+        }
+
+        .settings-field input {
+            width: 100%;
+            padding: 0.55rem 0.75rem;
+            border: 1px solid #b9cedf;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            background: white;
+            color: #1e2a3e;
+        }
+
+        .settings-field input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .settings-field input.invalid {
+            border-color: #d32f2f;
+        }
+
+        .settings-note {
+            margin: 0.75rem 0 0;
+            font-size: 0.75rem;
+            color: #4b6b7f;
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .card .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+        }
+
         @media (max-width: 680px) {
             .content {
                 padding: 1.25rem;
@@ -270,14 +344,43 @@
 <div class="card">
     <div class="card-header">
         <h1>JPEG Tightener</h1>
-        <div class="badge-group">
-            <span class="badge">📦 10 KB – 25 KB</span>
-            <span class="badge">📐 ≥ 600x800 px</span>
+        <div class="badge-group" id="badgeGroup">
+            <span class="badge" id="badgeSize">📦 10 KB – 25 KB</span>
+            <span class="badge" id="badgeDims">📐 ≥ 600×800 px</span>
             <span class="badge">⚡ JPG/JPEG output</span>
         </div>
-        <p style="margin: 0.5rem 0 0; font-size: 0.85rem;">Upload any image → automatic resize & compression → meets strict size + resolution</p>
+        <p style="margin: 0.5rem 0 0; font-size: 0.85rem;">Upload any image → automatic resize & compression → meets your size + resolution targets</p>
     </div>
     <div class="content">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2>⚙️ Output requirements</h2>
+                <div class="settings-actions">
+                    <button type="button" id="resetSettingsBtn" class="btn btn-outline btn-sm">Reset defaults</button>
+                    <button type="button" id="reprocessBtn" class="btn btn-primary btn-sm" style="display: none;">Re-optimize</button>
+                </div>
+            </div>
+            <div class="settings-grid">
+                <div class="settings-field">
+                    <label for="minSizeKb">Min file size (KB)</label>
+                    <input type="number" id="minSizeKb" min="1" max="5120" step="1" value="10">
+                </div>
+                <div class="settings-field">
+                    <label for="maxSizeKb">Max file size (KB)</label>
+                    <input type="number" id="maxSizeKb" min="1" max="5120" step="1" value="25">
+                </div>
+                <div class="settings-field">
+                    <label for="minWidth">Min width (px)</label>
+                    <input type="number" id="minWidth" min="1" max="8000" step="1" value="600">
+                </div>
+                <div class="settings-field">
+                    <label for="minHeight">Min height (px)</label>
+                    <input type="number" id="minHeight" min="1" max="8000" step="1" value="800">
+                </div>
+            </div>
+            <p class="settings-note">Defaults: 10–25 KB file size, minimum 600×800 px resolution. Adjust before uploading or re-optimize after changing.</p>
+        </div>
+
         <div class="upload-area" id="dropZone">
             <div class="upload-icon">📸</div>
             <p style="margin: 0 0 0.3rem; font-weight: 500;">Click or drag & drop an image</p>
@@ -330,16 +433,16 @@
     }));
 </script>
 <script>
-    // ----- CONSTRAINTS -----
-    const MIN_WIDTH = 600;
-    const MIN_HEIGHT = 800;
-    const MIN_SIZE_BYTES = 10240;   // 10 KB
-    const MAX_SIZE_BYTES = 25600;   // 25 KB
-    const MIN_QUALITY = 0.05;       // 5% quality floor
-    const MAX_QUALITY = 0.95;       // 95% quality ceiling
-    const MAX_ITER_DIM = 12;         // dimension adjustment safety
-    
-    // DOM elements
+    const DEFAULT_CONSTRAINTS = {
+        minSizeKb: 10,
+        maxSizeKb: 25,
+        minWidth: 600,
+        minHeight: 800
+    };
+    const MIN_QUALITY = 0.05;
+    const MAX_QUALITY = 0.95;
+    const MAX_ITER_DIM = 12;
+
     const fileInput = document.getElementById('fileInput');
     const dropZone = document.getElementById('dropZone');
     const previewGrid = document.getElementById('previewGrid');
@@ -354,14 +457,80 @@
     const downloadSection = document.getElementById('downloadSection');
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const minSizeKbInput = document.getElementById('minSizeKb');
+    const maxSizeKbInput = document.getElementById('maxSizeKb');
+    const minWidthInput = document.getElementById('minWidth');
+    const minHeightInput = document.getElementById('minHeight');
+    const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+    const reprocessBtn = document.getElementById('reprocessBtn');
+    const badgeSize = document.getElementById('badgeSize');
+    const badgeDims = document.getElementById('badgeDims');
+    const settingsInputs = [minSizeKbInput, maxSizeKbInput, minWidthInput, minHeightInput];
     
     let currentProcessedBlob = null;      // final jpeg blob
     let currentProcessedURL = null;
     let originalFileObj = null;
     let originalImageElement = null;
     let isProcessing = false;
-    
-    // helper: format bytes
+
+    function getConstraints() {
+        return {
+            minWidth: parseInt(minWidthInput.value, 10),
+            minHeight: parseInt(minHeightInput.value, 10),
+            minSizeBytes: parseInt(minSizeKbInput.value, 10) * 1024,
+            maxSizeBytes: parseInt(maxSizeKbInput.value, 10) * 1024,
+            minSizeKb: parseInt(minSizeKbInput.value, 10),
+            maxSizeKb: parseInt(maxSizeKbInput.value, 10)
+        };
+    }
+
+    function validateConstraints() {
+        const c = getConstraints();
+        let valid = true;
+
+        settingsInputs.forEach(input => input.classList.remove('invalid'));
+
+        if (!Number.isFinite(c.minSizeKb) || c.minSizeKb < 1) {
+            minSizeKbInput.classList.add('invalid');
+            valid = false;
+        }
+        if (!Number.isFinite(c.maxSizeKb) || c.maxSizeKb < 1) {
+            maxSizeKbInput.classList.add('invalid');
+            valid = false;
+        }
+        if (!Number.isFinite(c.minWidth) || c.minWidth < 1) {
+            minWidthInput.classList.add('invalid');
+            valid = false;
+        }
+        if (!Number.isFinite(c.minHeight) || c.minHeight < 1) {
+            minHeightInput.classList.add('invalid');
+            valid = false;
+        }
+        if (valid && c.minSizeKb > c.maxSizeKb) {
+            minSizeKbInput.classList.add('invalid');
+            maxSizeKbInput.classList.add('invalid');
+            valid = false;
+        }
+
+        return { valid, constraints: c };
+    }
+
+    function updateBadgeDisplay() {
+        const { valid, constraints } = validateConstraints();
+        if (!valid) return;
+        badgeSize.textContent = `📦 ${constraints.minSizeKb} KB – ${constraints.maxSizeKb} KB`;
+        badgeDims.textContent = `📐 ≥ ${constraints.minWidth}×${constraints.minHeight} px`;
+    }
+
+    function applyDefaultSettings() {
+        minSizeKbInput.value = DEFAULT_CONSTRAINTS.minSizeKb;
+        maxSizeKbInput.value = DEFAULT_CONSTRAINTS.maxSizeKb;
+        minWidthInput.value = DEFAULT_CONSTRAINTS.minWidth;
+        minHeightInput.value = DEFAULT_CONSTRAINTS.minHeight;
+        settingsInputs.forEach(input => input.classList.remove('invalid'));
+        updateBadgeDisplay();
+    }
+
     function formatBytes(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -475,34 +644,38 @@
         return { success: false, reason: 'undersize_final', blob: bestRespectMax.blob, size: bestRespectMax.size, quality: bestRespectMax.quality };
     }
     
-    // ensure min dimensions (preserve aspect ratio)
-    function enforceMinDimensions(imgWidth, imgHeight) {
+    function enforceMinDimensions(imgWidth, imgHeight, constraints) {
         let targetW = imgWidth;
         let targetH = imgHeight;
-        if (imgWidth < MIN_WIDTH || imgHeight < MIN_HEIGHT) {
-            const scaleX = MIN_WIDTH / imgWidth;
-            const scaleY = MIN_HEIGHT / imgHeight;
+        if (imgWidth < constraints.minWidth || imgHeight < constraints.minHeight) {
+            const scaleX = constraints.minWidth / imgWidth;
+            const scaleY = constraints.minHeight / imgHeight;
             const scale = Math.max(scaleX, scaleY);
             targetW = Math.round(imgWidth * scale);
             targetH = Math.round(imgHeight * scale);
         }
-        return { width: Math.max(targetW, MIN_WIDTH), height: Math.max(targetH, MIN_HEIGHT) };
+        return {
+            width: Math.max(targetW, constraints.minWidth),
+            height: Math.max(targetH, constraints.minHeight)
+        };
     }
-    
-    // Main adaptive algorithm: meets 10-25KB & min resolution
-    async function optimizeToConstraints(originalImgElement, naturalWidth, naturalHeight) {
-        // Step 1: ensure we meet min resolution (upscale if needed) – initial dimensions candidate
-        let curDimensions = enforceMinDimensions(naturalWidth, naturalHeight);
+
+    async function optimizeToConstraints(originalImgElement, naturalWidth, naturalHeight, constraints) {
+        let curDimensions = enforceMinDimensions(naturalWidth, naturalHeight, constraints);
         let currentWidth = curDimensions.width;
         let currentHeight = curDimensions.height;
-        
-        let bestResult = null;
+
         let iteration = 0;
         const maxAttempts = MAX_ITER_DIM;
-        
+
         while (iteration < maxAttempts) {
-            // try quality search for current dimensions
-            const qualityResult = await findQualityForDimensions(originalImgElement, currentWidth, currentHeight, MIN_SIZE_BYTES, MAX_SIZE_BYTES);
+            const qualityResult = await findQualityForDimensions(
+                originalImgElement,
+                currentWidth,
+                currentHeight,
+                constraints.minSizeBytes,
+                constraints.maxSizeBytes
+            );
             
             if (qualityResult.success && qualityResult.blob) {
                 // perfect match within range
@@ -516,17 +689,16 @@
                 let newWidth = Math.floor(currentWidth * 0.88);
                 let newHeight = Math.floor(currentHeight * 0.88);
                 // clamp to min constraints
-                const minRatio = Math.max(MIN_WIDTH / newWidth, MIN_HEIGHT / newHeight);
+                const minRatio = Math.max(constraints.minWidth / newWidth, constraints.minHeight / newHeight);
                 if (minRatio > 1) {
-                    newWidth = Math.max(MIN_WIDTH, Math.floor(newWidth * minRatio));
-                    newHeight = Math.max(MIN_HEIGHT, Math.floor(newHeight * minRatio));
+                    newWidth = Math.max(constraints.minWidth, Math.floor(newWidth * minRatio));
+                    newHeight = Math.max(constraints.minHeight, Math.floor(newHeight * minRatio));
                 } else {
-                    newWidth = Math.max(MIN_WIDTH, newWidth);
-                    newHeight = Math.max(MIN_HEIGHT, newHeight);
+                    newWidth = Math.max(constraints.minWidth, newWidth);
+                    newHeight = Math.max(constraints.minHeight, newHeight);
                 }
                 if (newWidth === currentWidth && newHeight === currentHeight) {
-                    // cannot shrink further without violating min resolution => impossible
-                    throw new Error("Cannot meet file size ≤25KB even at lowest quality and minimum dimensions (600x800). Image is too complex. Try a simpler image.");
+                    throw new Error(`Cannot meet file size ≤${constraints.maxSizeKb}KB even at lowest quality and minimum dimensions (${constraints.minWidth}×${constraints.minHeight}). Image is too complex. Try a simpler image or raise the max size.`);
                 }
                 currentWidth = newWidth;
                 currentHeight = newHeight;
@@ -554,23 +726,35 @@
         }
         
         // final attempt: after loop, try one last time with best dimensions
-        const finalAttempt = await findQualityForDimensions(originalImgElement, currentWidth, currentHeight, MIN_SIZE_BYTES, MAX_SIZE_BYTES);
+        const finalAttempt = await findQualityForDimensions(
+            originalImgElement,
+            currentWidth,
+            currentHeight,
+            constraints.minSizeBytes,
+            constraints.maxSizeBytes
+        );
         if (finalAttempt.blob) {
             return { blob: finalAttempt.blob, size: finalAttempt.size, width: currentWidth, height: currentHeight, quality: finalAttempt.quality || 0.7 };
         }
         throw new Error("Unable to produce image that respects both constraints. Try a different image.");
     }
     
-    // main processing pipeline
     async function processImage(file) {
         if (!file) return;
+
+        const { valid, constraints } = validateConstraints();
+        if (!valid) {
+            showStatus("Please fix the output requirements: min size must be ≤ max size, and all values must be at least 1.", false);
+            return;
+        }
+
         if (isProcessing) {
             showStatus("Processing already in progress...", false);
             return;
         }
         isProcessing = true;
         showStatus("⏳ Loading & optimizing image... hold on", false);
-        
+
         try {
             // read as dataURL and load image
             const reader = new FileReader();
@@ -597,8 +781,7 @@
             origDimsSpan.innerText = `${origWidth} × ${origHeight}`;
             origSizeSpan.innerText = formatBytes(origSizeBytes);
             
-            // run optimizer
-            const optimized = await optimizeToConstraints(img, origWidth, origHeight);
+            const optimized = await optimizeToConstraints(img, origWidth, origHeight, constraints);
             
             if (optimized.blob) {
                 const optURL = URL.createObjectURL(optimized.blob);
@@ -610,36 +793,33 @@
                 const finalSizeBytes = optimized.size;
                 optSizeSpan.innerText = formatBytes(finalSizeBytes);
                 
-                // compliance verification
-                const dimsOk = (optimized.width >= MIN_WIDTH && optimized.height >= MIN_HEIGHT);
-                const sizeOk = (finalSizeBytes >= MIN_SIZE_BYTES && finalSizeBytes <= MAX_SIZE_BYTES);
+                const dimsOk = (optimized.width >= constraints.minWidth && optimized.height >= constraints.minHeight);
+                const sizeOk = (finalSizeBytes >= constraints.minSizeBytes && finalSizeBytes <= constraints.maxSizeBytes);
                 let complianceText = "";
-                let complianceColor = "";
                 if (dimsOk && sizeOk) {
-                    complianceText = "✅ Fully compliant";
+                    complianceText = `✓ Meets ${constraints.minSizeKb}–${constraints.maxSizeKb} KB & ≥${constraints.minWidth}×${constraints.minHeight}`;
                     complianceBadge.style.color = "#2e7d32";
-                } else if (dimsOk && finalSizeBytes < MIN_SIZE_BYTES) {
-                    complianceText = "⚠️ Size below 10KB (max quality reached)";
+                } else if (dimsOk && finalSizeBytes < constraints.minSizeBytes) {
+                    complianceText = `⚠️ Size below ${constraints.minSizeKb} KB (max quality reached)`;
                     complianceBadge.style.color = "#e68a2e";
-                } else if (dimsOk && finalSizeBytes > MAX_SIZE_BYTES) {
-                    complianceText = "⚠️ Slightly above 25KB (try simpler image)";
+                } else if (dimsOk && finalSizeBytes > constraints.maxSizeBytes) {
+                    complianceText = `⚠️ Slightly above ${constraints.maxSizeKb} KB (try simpler image)`;
                     complianceBadge.style.color = "#c62828";
                 } else {
                     complianceText = "⚠️ Resolution constraint barely met, but within bounds";
                     complianceBadge.style.color = "#f5a623";
                 }
-                if (dimsOk && sizeOk) complianceText = "✓ Meets 10KB–25KB & ≥600x800";
                 complianceBadge.innerText = complianceText;
-                
-                // Show download section and preview
+
                 previewGrid.style.display = "flex";
                 downloadSection.style.display = "block";
+                reprocessBtn.style.display = "inline-block";
                 if (dimsOk && sizeOk) {
-                    showStatus("✅ Optimization successful! Image satisfies all constraints (10–25KB, 600x800+). Ready to download.", true);
-                } else if (finalSizeBytes < MIN_SIZE_BYTES) {
-                    showStatus(`⚠️ Final size ${formatBytes(finalSizeBytes)} is below 10KB. Upscaling limited. Still meets resolution.`, false);
-                } else if (finalSizeBytes > MAX_SIZE_BYTES) {
-                    showStatus(`⚠️ Final size ${formatBytes(finalSizeBytes)} slightly exceeds 25KB (max ${MAX_SIZE_BYTES/1024}KB). Try original with less texture/detail.`, false);
+                    showStatus(`✅ Optimization successful! Image satisfies your targets (${constraints.minSizeKb}–${constraints.maxSizeKb} KB, ≥${constraints.minWidth}×${constraints.minHeight}). Ready to download.`, true);
+                } else if (finalSizeBytes < constraints.minSizeBytes) {
+                    showStatus(`⚠️ Final size ${formatBytes(finalSizeBytes)} is below ${constraints.minSizeKb} KB. Upscaling limited. Still meets resolution.`, false);
+                } else if (finalSizeBytes > constraints.maxSizeBytes) {
+                    showStatus(`⚠️ Final size ${formatBytes(finalSizeBytes)} slightly exceeds ${constraints.maxSizeKb} KB. Try original with less texture/detail or raise max size.`, false);
                 } else {
                     showStatus("✔ Image processed but double-check resolution. Usually fine.", true);
                 }
@@ -681,8 +861,28 @@
         optimizedImg.src = "";
         originalFileObj = null;
         originalImageElement = null;
+        reprocessBtn.style.display = "none";
     }
-    
+
+    settingsInputs.forEach(input => {
+        input.addEventListener('input', updateBadgeDisplay);
+    });
+
+    resetSettingsBtn.addEventListener('click', () => {
+        applyDefaultSettings();
+        if (originalFileObj) {
+            showStatus("Defaults restored. Click Re-optimize to apply to the current image.", false);
+        }
+    });
+
+    reprocessBtn.addEventListener('click', () => {
+        if (originalFileObj) {
+            processImage(originalFileObj);
+        }
+    });
+
+    updateBadgeDisplay();
+
     // download handler
     downloadBtn.addEventListener('click', () => {
         if (currentProcessedBlob) {
